@@ -141,6 +141,7 @@ def get_gemini_insight(api_key, cluster_name, row, global_avg):
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-2.5-flash') 
         prompt = f"""
+        use indonesian language,
         Act as Senior Marketing Analyst. Analyze segment: '{cluster_name}'.
         Data: Recency {row['Recency']:.1f} (Avg {global_avg['Recency']:.1f}), Frequency {row['Frequency']:.1f}, Monetary ${row['Monetary']:.0f}.
         Task: 1 Sentence behavior interpretation & 2 Specific tactics. Output plain text.
