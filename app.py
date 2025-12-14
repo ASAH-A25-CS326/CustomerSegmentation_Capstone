@@ -273,6 +273,17 @@ with tab_clv:
             Prediksi kemungkinan pelanggan pergi meninggalkan bisnis Anda. Diukur dari kapan terakhir kali mereka belanja (*Recency*).
             * **High Risk:** Sudah lama sekali tidak belanja (Bahaya!).
             * **Low Risk:** Baru saja belanja (Aman).
+        --------------------------------------------------------------------------------------------------------------------------------
+        **Penjelasan Rule-Based:**
+        * **CLV (Historical)** = total belanja historis (HistoricalCLV = Monetary)
+        * **Kategori CLV** ditentukan otomatis per dataset:
+            * **High CLV** = pelanggan di ≈30% teratas nilai HistoricalCLV (>= persentil 70 / q70)
+            * **Low CLV** = pelanggan di ≈30% terbawah nilai HistoricalCLV (<= persentil 30 / q30)
+            * **Medium CLV** = sisanya
+        * **Churn Risk** ditentukan dari Recency (hari sejak transaksi terakhir) memakai persentil:
+            * **High Risk** = ≈30% recency tertinggi (>= persentil 70 / r_q70) → lama tidak belanja
+            * **Low Risk** = ≈30% recency terendah (<= persentil 30 / r_q30) → baru belanja
+            * **Medium Risk** = sisanya
         """)
     
     st.divider()
@@ -332,19 +343,28 @@ with tab_insight:
 with tab_explore:
     st.subheader("Data Explorer")
     
-    # Filter Controls
-    col_f1, col_f2, col_f3 = st.columns(3)
+    # --- Layout Filter Baris 1 ---
+    r1_c1, r1_c2, r1_c3 = st.columns(3)
     
-    with col_f1:
+    with r1_c1:
         search_cust = st.text_input("🔍 Cari Customer ID:", placeholder="Contoh: 12345")
     
-    with col_f2:
+    with r1_c2:
         filter_cluster = st.multiselect("📂 Filter Cluster:", options=sorted(rfm_df['Cluster'].unique()))
         
-    with col_f3:
+    with r1_c3:
         filter_segment = st.multiselect("🏷️ Filter Segment Name:", options=sorted(rfm_df['Segment Name'].unique()))
     
-    # Logic Filter
+    # --- Layout Filter Baris 2 ---
+    r2_c1, r2_c2 = st.columns(2)
+    
+    with r2_c1:
+        filter_clv = st.multiselect("💎 Filter CLV Value Segment:", options=sorted(rfm_df['CLV_ValueSegment'].unique()))
+        
+    with r2_c2:
+        filter_churn = st.multiselect("⚠️ Filter Churn Risk:", options=sorted(rfm_df['Churn_Risk'].unique()))
+    
+    # --- Logic Filter ---
     df_show = rfm_df.copy()
     
     if search_cust:
@@ -355,6 +375,12 @@ with tab_explore:
         
     if filter_segment:
         df_show = df_show[df_show['Segment Name'].isin(filter_segment)]
+        
+    if filter_clv:
+        df_show = df_show[df_show['CLV_ValueSegment'].isin(filter_clv)]
+        
+    if filter_churn:
+        df_show = df_show[df_show['Churn_Risk'].isin(filter_churn)]
         
     # Tampilkan Data
     st.write(f"Menampilkan **{len(df_show)}** data pelanggan.")
